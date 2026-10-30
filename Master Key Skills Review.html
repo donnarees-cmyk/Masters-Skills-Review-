@@ -1,0 +1,644 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Master Key Skills Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.3/confetti.browser.min.js"></script>
+<style>
+/* Layout: a vault map of 9 locks; each lock opens a one-card-at-a-time lesson (learn → try → practice → key unlocked). Single committed look: navy vault, cream cards, gold keys. */
+:root{
+  --vault:#13203f; --vault-2:#1d2d55; --gold:#f2b705; --gold-deep:#c98f00;
+  --card:#fffaf0; --ink:#1b2240; --muted:#5b6283; --line:#e6dcc6;
+  --good:#1f9d6b; --good-bg:#e3f6ec; --try:#d9822b; --try-bg:#fff0de; --miss:#c2416b; --miss-bg:#fde7ee;
+  --display:"Lilita One","Arial Rounded MT Bold","Trebuchet MS",sans-serif;
+  --body:"Atkinson Hyperlegible",Verdana,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--vault);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.55;
+  background-image:radial-gradient(circle at 15% 10%,rgba(242,183,5,.10),transparent 40%),radial-gradient(circle at 85% 90%,rgba(90,140,255,.12),transparent 45%);min-height:100%}
+.wrap{max-width:860px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#fff;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo-spot{width:64px;height:64px;border-radius:14px;border:2px dashed rgba(242,183,5,.6);display:grid;place-items:center;overflow:hidden;flex:none}
+.logo-spot img{width:100%;height:100%;object-fit:contain}
+.brand small{display:block;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.brand b{font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:.02em}
+.score-pill{background:var(--vault-2);border:2px solid var(--gold);color:#fff;border-radius:999px;padding:6px 16px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.score-pill span{color:var(--gold)}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0;line-height:1.15}
+.hero{color:#fff;text-align:left;margin:8px 0 22px}
+.hero h1{font-size:clamp(34px,7vw,56px);color:var(--gold);text-shadow:0 3px 0 rgba(0,0,0,.25)}
+.hero p{max-width:60ch;margin:8px 0 0;color:#dfe6ff}
+.card{background:var(--card);border-radius:22px;padding:24px;box-shadow:0 10px 0 rgba(0,0,0,.18)}
+.name-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+input[type=text],textarea{font:inherit;font-size:18px;border:3px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;color:var(--ink);width:100%}
+input[type=text]{flex:1 1 220px;width:auto}
+input:focus,textarea:focus{outline:none;border-color:var(--gold)}
+.btn{font:inherit;font-weight:700;font-size:18px;border:none;border-radius:14px;padding:12px 20px;cursor:pointer;background:var(--gold);color:var(--ink);box-shadow:0 4px 0 var(--gold-deep);transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--gold-deep)}
+.btn:focus-visible,.opt:focus-visible,.lock:focus-visible,.tapline:focus-visible{outline:4px solid #5a8cff;outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 3px var(--line)}
+.btn.dark{background:var(--vault-2);color:#fff;box-shadow:0 4px 0 #0b1430}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+/* map */
+.map{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:620px){.map{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.lock{border:none;font:inherit;text-align:left;cursor:pointer;border-radius:20px;padding:16px;background:var(--card);color:var(--ink);position:relative;box-shadow:0 6px 0 rgba(0,0,0,.2);display:flex;flex-direction:column;gap:6px;min-height:150px;border-top:10px solid var(--c)}
+.lock .num{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.lock h3{font-size:21px}
+.lock p{margin:0;font-size:15px;color:var(--muted)}
+.lock .status{margin-top:auto;font-weight:700;font-size:15px}
+.lock.done{background:#fff6d6}
+.lock.done .status{color:var(--good)}
+.keyicon{position:absolute;top:10px;right:12px;width:34px;height:34px}
+/* station */
+.station-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#fff;margin-bottom:12px}
+.station-head h2{font-size:clamp(24px,5vw,34px);color:#fff}
+.station-head .eyebrow{color:var(--gold);font-size:14px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+.progress{height:14px;background:var(--vault-2);border-radius:999px;overflow:hidden;margin-bottom:16px;border:2px solid rgba(255,255,255,.15)}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#ffd95a);border-radius:999px;transition:width .4s}
+.step-tag{display:inline-block;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--c);color:#fff;margin-bottom:10px}
+.card h3{font-size:28px;margin-bottom:10px;color:var(--ink)}
+.card p{margin:0 0 12px;max-width:68ch}
+.card ul{margin:0 0 12px;padding-left:22px}
+.card li{margin-bottom:6px}
+.term{font-weight:700;color:var(--c)}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:10px 0 14px}
+.chip{background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 10px;font-size:16px}
+.chip b{color:var(--c);font-size:18px}
+.tip{background:#fff;border-left:6px solid var(--gold);border-radius:12px;padding:12px 14px;margin:12px 0}
+.passage{background:#fff;border:2px solid var(--line);border-radius:16px;padding:16px 18px;margin:0 0 16px;font-size:18px}
+.passage .pt{font-family:var(--display);font-size:20px;margin-bottom:6px;color:var(--c)}
+.poem{white-space:pre-line;font-style:italic}
+.q{font-weight:700;font-size:20px;margin:0 0 12px}
+.opts{display:grid;gap:10px}
+.opt{font:inherit;text-align:left;border:3px solid var(--line);background:#fff;color:var(--ink);border-radius:14px;padding:12px 16px;cursor:pointer;display:flex;gap:12px;align-items:flex-start}
+.opt .ltr{flex:none;width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:700;font-size:16px}
+.opt:hover:not([disabled]){border-color:var(--c)}
+.opt.sel{border-color:var(--c);background:#f6f3ff}
+.opt.right{border-color:var(--good);background:var(--good-bg)}
+.opt.wrong{border-color:var(--miss);background:var(--miss-bg);opacity:.75}
+.opt[disabled]{cursor:default}
+.tapline{display:block;width:100%;font:inherit;text-align:left;border:2px dashed transparent;background:transparent;color:var(--ink);border-radius:10px;padding:6px 8px;cursor:pointer;margin:2px 0}
+.tapline:hover:not([disabled]){background:#fff6d6;border-color:var(--gold)}
+.tapline.right{background:var(--good-bg);border:2px solid var(--good)}
+.tapline.wrong{background:var(--miss-bg);border:2px solid var(--miss);opacity:.75}
+.order-bank,.order-ans{display:flex;flex-direction:column;gap:8px;min-height:50px}
+.order-ans{background:#fff;border:3px dashed var(--line);border-radius:14px;padding:10px;margin-bottom:12px}
+.order-ans .opt .ltr{background:var(--gold);color:var(--ink)}
+.feedback{margin-top:14px;border-radius:14px;padding:14px 16px;font-size:17px}
+.feedback.good{background:var(--good-bg);border:2px solid var(--good)}
+.feedback.hint{background:var(--try-bg);border:2px solid var(--try)}
+.feedback.miss{background:var(--miss-bg);border:2px solid var(--miss)}
+.feedback b.big{display:block;font-family:var(--display);font-weight:400;font-size:22px;margin-bottom:4px}
+.starters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.starters button{font:inherit;font-size:15px;border:2px solid var(--c);color:var(--ink);background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer}
+textarea{min-height:150px;resize:vertical}
+.wc{font-size:14px;color:var(--muted);margin-top:4px}
+.model{background:#fff;border:2px dashed var(--c);border-radius:12px;padding:12px 14px;margin-top:10px}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px;flex-wrap:wrap}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.speak{font:inherit;font-size:15px;font-weight:700;border:2px solid var(--c);background:#fff;color:var(--ink);border-radius:999px;padding:5px 14px;cursor:pointer;float:right;margin:0 0 8px 10px}
+.example-reveal{margin-top:10px}
+.bigkey{display:block;margin:6px auto 10px;width:120px;height:120px;animation:spin 1.4s ease-out}
+.bigkey svg,.keyicon svg{width:100%;height:100%;display:block}
+@keyframes spin{from{transform:rotate(-200deg) scale(.3)}to{transform:none}}
+.center{text-align:center}
+.center p{margin-left:auto;margin-right:auto}
+.cert{border:6px double var(--gold);border-radius:22px;padding:22px;text-align:center;background:#fffdf5}
+.cert h2{font-size:clamp(28px,6vw,44px);color:var(--gold-deep)}
+.cert .who{font-family:var(--display);font-size:clamp(30px,7vw,48px);color:var(--ink);margin:8px 0}
+.tally{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin:14px 0;text-align:left}
+.tally div{background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px;font-size:15px;font-variant-numeric:tabular-nums}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(150%);background:var(--gold);color:var(--ink);font-family:var(--display);font-size:22px;padding:12px 22px;border-radius:999px;box-shadow:0 6px 0 var(--gold-deep);transition:transform .3s;z-index:20;max-width:calc(100% - 32px);text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+svg text{font-family:var(--body)}
+footer{color:#aab4d6;font-size:13px;text-align:center;margin-top:26px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo-spot" id="logoSpot" aria-label="Logo"></div>
+      <div><small>The Literacy Locksmith</small><b>Master Key Review</b></div>
+    </div>
+    <div class="score-pill" id="scorePill">🔑 <span id="scoreNum">0</span> key points</div>
+  </header>
+  <main id="app"></main>
+  <footer>The Literacy Locksmith · created and copyrighted by Donna Rees · Your work saves on this iPad automatically.</footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============ CONTENT ============ */
+const KEY_SVG = c => `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="20" cy="22" r="13" fill="none" stroke="${c}" stroke-width="7"/><path d="M29 31 L54 56 M44 46 L50 40 M49 51 L55 45" stroke="${c}" stroke-width="7" stroke-linecap="round"/></svg>`;
+
+const PLOT_SVG = `<div style="overflow-x:auto"><svg viewBox="0 0 640 230" style="width:100%;min-width:480px;max-width:100%;height:auto" role="img" aria-label="Plot diagram mountain">
+<polyline points="20,190 150,190 330,40 470,150 620,150" fill="none" stroke="#2c7be5" stroke-width="6" stroke-linejoin="round"/>
+<circle cx="330" cy="40" r="10" fill="#f2b705" stroke="#1b2240" stroke-width="3"/>
+<text x="30" y="215" font-size="17" fill="#1b2240" font-weight="700">1. Exposition</text>
+<text x="168" y="135" font-size="17" fill="#1b2240" font-weight="700" transform="rotate(-38 168 135)">2. Rising Action</text>
+<text x="290" y="22" font-size="17" fill="#1b2240" font-weight="700">3. Climax</text>
+<text x="400" y="80" font-size="17" fill="#1b2240" font-weight="700">4. Falling Action</text>
+<text x="480" y="178" font-size="17" fill="#1b2240" font-weight="700">5. Resolution</text>
+</svg></div>`;
+
+const STATIONS = [
+/* ---------------- 1 ROOTS ---------------- */
+{ id:"roots", color:"#2a9d8f", title:"Word Part Workshop", blurb:"Greek & Latin roots",
+  learn:[
+   {h:"Words are built from parts", html:`<p>Big words are like locks with a few pieces inside. If you know the pieces, you can open the word!</p>
+   <ul><li><span class="term">Prefix</span>: a part at the <b>front</b> of a word (like <i>tele-</i> in <i>telephone</i>).</li>
+   <li><span class="term">Root</span>: the <b>core</b> part that carries the main meaning (like <i>port</i> in <i>transport</i>).</li>
+   <li><span class="term">Suffix</span>: a part at the <b>end</b> (like <i>-ology</i> in <i>biology</i>).</li></ul>
+   <div class="tip"><b>Example:</b> <i>trans</i> (across) + <i>port</i> (carry) = <b>transport</b>, to carry something across from one place to another.</div>`},
+   {h:"Your root key ring", html:`<p>These are roots you have seen in our lessons. Study them. You will need them in a minute!</p>
+   <div class="chips">
+   <div class="chip"><b>bio</b> = life</div><div class="chip"><b>graph</b> = write</div><div class="chip"><b>scrib / script</b> = write</div>
+   <div class="chip"><b>tele</b> = far</div><div class="chip"><b>port</b> = carry</div><div class="chip"><b>spect</b> = look</div>
+   <div class="chip"><b>vis / vid</b> = see</div><div class="chip"><b>dict</b> = say</div><div class="chip"><b>aud</b> = hear</div>
+   <div class="chip"><b>phon</b> = sound</div><div class="chip"><b>rupt</b> = break</div><div class="chip"><b>struct</b> = build</div>
+   <div class="chip"><b>chron</b> = time</div><div class="chip"><b>micro</b> = small</div><div class="chip"><b>scope</b> = see / look at</div>
+   <div class="chip"><b>geo</b> = earth</div><div class="chip"><b>therm</b> = heat</div><div class="chip"><b>-ology</b> = study of</div></div>`},
+   {h:"The 4-step word unlock", html:`<ul><li><b>1. Break it.</b> Split the word into parts.</li><li><b>2. Define each part.</b> Use your root key ring.</li><li><b>3. Put it together.</b> Make a meaning in your own words.</li><li><b>4. Check it.</b> Reread the sentence. Does your meaning make sense there?</li></ul>
+   <div class="tip">Context clues are your backup key. The words around a hard word often hint at its meaning.</div>`}
+  ],
+  example:{q:`The earthquake caused the road to <b>rupture</b>. What does <i>rupture</i> mean?`,
+    a:`<b>Break it:</b> rupt + ure. <b>Define:</b> <i>rupt</i> means break. <b>Put it together:</b> rupture means to break open. <b>Check:</b> "The earthquake caused the road to break open." Yes, that makes sense!`},
+  qs:[
+   {t:"mc",q:`The word <b>chronological</b> has the root <i>chron</i>. A chronological list is organized by…`,opts:["size, from smallest to biggest","time, in the order things happened","color, from light to dark","importance, from most to least"],a:1,hint:"Look at your root key ring. What does chron mean?",why:"Chron means time, so a chronological list goes in time order."},
+   {t:"mc",q:`"The <b>audience</b> cheered when the band walked on stage." Based on the root <i>aud</i>, an audience is a group of people who…`,opts:["build the stage","write the songs","listen to or watch a performance","carry the instruments"],a:2,hint:"Aud means hear.",why:"Aud means hear. An audience is the group that hears and watches a performance."},
+   {t:"mc",q:`A <b>biologist</b> is a scientist who studies…`,opts:["living things","rocks and minerals","weather and heat","old writings"],a:0,hint:"Break it: bio + ology + ist. What does bio mean?",why:"Bio means life and -ology means study of, so a biologist studies living things."},
+   {t:"mc",passage:`The <b>inspector</b> walked slowly along the bridge, examining every bolt and beam for cracks.`,q:"What does the word inspector most likely mean?",opts:["a person who builds bridges","a person who looks closely to check something","a person who carries heavy loads","a person who speaks to a crowd"],a:1,hint:"Find the root spect. Then use the context: examining every bolt.",why:"Spect means look, and the context says he was examining every bolt. An inspector looks closely to check something."},
+   {t:"multi",q:"Select ALL the words that contain a root meaning <b>write</b>.",opts:["autograph","scribble","telephone","manuscript","portable"],a:[0,1,3],hint:"Two roots mean write: graph and scrib/script. Find them inside the words.",why:"Autograph (graph), scribble (scrib) and manuscript (script) all carry the meaning write. Telephone has tele and phon; portable has port."},
+   {t:"mc",q:`Use the parts to unlock <b>microscope</b>: <i>micro</i> + <i>scope</i>.`,opts:["a tool for hearing far-away sounds","a tool for seeing very small things","a tool for measuring heat","a tool for writing quickly"],a:1,hint:"Micro = small. Scope = see or look at.",why:"Micro means small and scope means see, so a microscope helps you see very small things."},
+   {t:"write",q:"Build your own words! Choose ONE root from the key ring. Write two words that use it, and explain how the root helps you understand each word.",starters:["The root ___ means ___.","One word with this root is ___, which means ___.","Another word is ___. The root helps me know it means ___."],look:["means","root","because"],model:"The root port means carry. One word is transport, which means to carry something across. Another word is portable. The root helps me know portable means something you can carry easily, like a portable speaker."}
+  ]},
+/* ---------------- 2 FIGURATIVE ---------------- */
+{ id:"fig", color:"#e76f51", title:"Figurative Language Lock", blurb:"Similes, metaphors & more",
+  learn:[
+   {h:"Literal vs. figurative", html:`<p><span class="term">Literal</span> language means exactly what it says. <span class="term">Figurative</span> language uses words in a creative way to paint a picture, show a feeling, or make an idea stronger.</p>
+   <div class="tip"><b>Literal:</b> It was very cold outside.<br><b>Figurative:</b> The wind bit my cheeks like an angry dog.</div>`},
+   {h:"Your figurative toolbox", html:`<ul>
+   <li><span class="term">Simile</span>: compares two unlike things using <b>like</b> or <b>as</b>. <i>Her smile was as bright as the sun.</i></li>
+   <li><span class="term">Metaphor</span>: compares two unlike things by saying one <b>is</b> the other. <i>The hallway was a river of students.</i></li>
+   <li><span class="term">Personification</span>: gives human actions or feelings to something that is not human. <i>The leaves danced.</i></li>
+   <li><span class="term">Hyperbole</span>: a huge exaggeration. <i>I have a million things to do.</i></li>
+   <li><span class="term">Idiom</span>: a saying whose meaning is different from its words. <i>Break a leg!</i> means good luck.</li>
+   <li><span class="term">Onomatopoeia</span>: a word that sounds like the sound it names. <i>Buzz, crash, sizzle.</i></li>
+   <li><span class="term">Alliteration</span>: repeating the same beginning sound. <i>Seven sleepy snakes.</i></li>
+   <li><span class="term">Imagery</span>: words that appeal to the five senses.</li></ul>`},
+   {h:"Ask WHY the author used it", html:`<p>Finding the figurative language is step one. The test will ask the bigger question: <b>how does it help the reader?</b></p>
+   <ul><li>Does it help us <b>picture</b> something?</li><li>Does it create a <b>mood</b> (scary, calm, joyful)?</li><li>Does it show a character's or speaker's <b>feelings</b>?</li><li>Does it make an idea <b>stronger</b> or more memorable?</li></ul>`}
+  ],
+  example:{q:`"The old car groaned up the hill." What type of figurative language is this, and why did the author use it?`,
+   a:`It is <b>personification</b>. Cars cannot really groan like a person. The author uses it to show the car is old and struggling, so we can almost hear it working hard.`},
+  passage:{title:"Storm Night (a poem)",lines:["The wind howled at my window, begging to come inside.","Thunder was a drummer pounding out the sky's wild beat.","The rain fell like tiny pebbles,","tap-tap-tapping on the tin roof.","I waited a million years for morning."]},
+  qs:[
+   {t:"tap",q:"Tap the line from the poem that uses <b>personification</b>.",a:0,hint:"Which non-human thing does something only a person can do, like begging?",why:"The wind cannot really beg like a person. Giving it a human action is personification."},
+   {t:"tap",q:"Now tap the line that uses a <b>simile</b>.",a:2,hint:"Look for the word like or as.",why:"The rain is compared to tiny pebbles using the word like. That is a simile."},
+   {t:"mc",q:`"Thunder was a drummer pounding out the sky's wild beat." This line is a…`,opts:["simile, because it compares with like","metaphor, because it says thunder IS a drummer","hyperbole, because it exaggerates","idiom, because it is a common saying"],a:1,hint:"Is there a like or as? Or does it say one thing IS another?",why:"It says thunder was a drummer, with no like or as. That makes it a metaphor."},
+   {t:"mc",q:`"I waited a million years for morning." What does this hyperbole show about the speaker?`,opts:["The speaker is very old.","The night felt extremely long because the speaker was uneasy.","The speaker loves storms.","Morning came very quickly."],a:1,hint:"Nobody really waits a million years. What feeling does the exaggeration show?",why:"The exaggeration shows the night felt endless, which tells us the speaker was nervous or restless."},
+   {t:"mc",q:`Which word from the poem is an example of <b>onomatopoeia</b>?`,opts:["howled","drummer","tap-tap-tapping","morning"],a:2,hint:"Say each word out loud. Which one sounds like the noise it describes?",why:"Tap-tap-tapping sounds like the rain hitting the roof. Howled is close, but tap-tap-tapping is a sound word made to imitate the noise."},
+   {t:"mc",q:`Together, the figurative language in "Storm Night" mainly creates a mood that is…`,opts:["calm and sleepy","silly and funny","tense and restless","sad and lonely"],a:2,hint:"Think about the howling wind, pounding thunder, and a night that felt like a million years.",why:"Howling, pounding, and an endless wait all build a tense, restless mood."},
+   {t:"mc",q:`Your friend says, "It's raining cats and dogs!" This idiom means…`,opts:["pets are falling from the sky","it is raining very hard","it is barely sprinkling","animals are scared of rain"],a:1,hint:"An idiom does not mean exactly what the words say.",why:"Raining cats and dogs is an idiom that means it is raining very hard."},
+   {t:"write",q:`Choose ONE example of figurative language from "Storm Night." Name the type, and explain how it helps the reader picture or feel the storm.`,starters:["In the line ___, the poet uses ___.","This helps the reader ___ because ___.","It creates a ___ mood."],look:["simile","metaphor","personification","hyperbole","onomatopoeia","mood","picture","feel"],model:`In the line "Thunder was a drummer pounding out the sky's wild beat," the poet uses a metaphor. It helps the reader hear how loud and steady the thunder is, like drums. It creates a wild, tense mood.`}
+  ]},
+/* ---------------- 3 POETRY STRUCTURE ---------------- */
+{ id:"poem", color:"#7b4fd6", title:"Poem Blueprint", blurb:"Poetic forms & structure",
+  learn:[
+   {h:"The parts of a poem", html:`<ul><li><span class="term">Line</span>: one row of words in a poem.</li>
+   <li><span class="term">Stanza</span>: a group of lines, like a paragraph in a poem. A <b>couplet</b> has 2 lines, a <b>tercet</b> 3 lines, a <b>quatrain</b> 4 lines.</li>
+   <li><span class="term">Rhyme scheme</span>: the pattern of rhymes at the ends of lines, labeled with letters. Lines that rhyme get the same letter: <b>AABB</b> or <b>ABAB</b>.</li>
+   <li><span class="term">Rhythm / meter</span>: the beat or pattern of stressed syllables.</li>
+   <li><span class="term">Repetition / refrain</span>: words or lines that repeat to make an idea stand out.</li>
+   <li><span class="term">Line breaks</span>: where the poet chooses to end a line. A break makes the reader pause.</li></ul>`},
+   {h:"Poetic forms to know", html:`<ul><li><span class="term">Free verse</span>: no set rhyme or rhythm. Sounds like natural speech.</li>
+   <li><span class="term">Haiku</span>: 3 lines with 5, 7, 5 syllables, often about nature or a season.</li>
+   <li><span class="term">Limerick</span>: 5 lines, rhyme scheme AABBA, bouncy rhythm, usually funny.</li>
+   <li><span class="term">Sonnet</span>: 14 lines with a set rhyme scheme, often about love or a big idea.</li>
+   <li><span class="term">Narrative poem</span>: tells a story with characters and events.</li>
+   <li><span class="term">Ode</span>: praises or celebrates a person, place, or thing.</li></ul>`},
+   {h:"Structure builds meaning", html:`<p>Poets choose a structure on purpose. Always ask: <b>how does this form or structure help the poem's meaning?</b></p>
+   <div class="tip">A short haiku makes a quiet, single moment feel still. A limerick's bouncy rhyme makes a story feel silly. Short lines in free verse slow you down so each word matters.</div>`}
+  ],
+  example:{q:`How do you find a rhyme scheme? Try: "The sun went down (A) / behind the hill (B) / the sleepy town (?) / grew dark and still (?)"`,
+   a:`Give the first ending sound the letter A (down). A new sound gets B (hill). "Town" rhymes with "down," so it is A. "Still" rhymes with "hill," so it is B. The rhyme scheme is <b>ABAB</b>.`},
+  qs:[
+   {t:"mc",passage:`<div class="pt">Poem 1</div><div class="poem">Orange leaves drifting
+settling on the quiet pond
+autumn whispers by</div>`,q:"What form is Poem 1?",opts:["limerick","haiku","sonnet","narrative poem"],a:1,hint:"Count the lines and syllables: 5, 7, 5?",why:"It has 3 lines with 5-7-5 syllables and describes a nature moment. That is a haiku."},
+   {t:"mc",passage:`<div class="pt">Poem 2</div><div class="poem">A cat with a hat made of cheese
+Went sailing across the seas.
+The mice on the shore
+Cried out, "We want more!"
+So she tossed them a slice with a sneeze.</div>`,q:"What is the rhyme scheme of Poem 2?",opts:["ABAB","AABB","AABBA","ABCDE"],a:2,hint:"Cheese, seas, shore, more, sneeze. Give matching sounds the same letter.",why:"Cheese/seas = A A, shore/more = B B, sneeze = A. The scheme is AABBA."},
+   {t:"mc",q:"How does the structure of Poem 2 (the limerick) affect the poem?",opts:["The 14 lines make it serious and thoughtful.","The bouncy rhythm and rhymes make the silly story feel funny.","The lack of rhyme makes it sound like a conversation.","The 5-7-5 pattern creates a calm, quiet feeling."],a:1,hint:"Think about how a limerick sounds when you read it aloud.",why:"A limerick's quick, bouncy rhythm and AABBA rhyme add to the humor of the silly cheese story."},
+   {t:"mc",passage:`<div class="pt">Poem 3</div><div class="poem">I climbed the hill at break of day,
+The town below was small and gray.
+But when the sun began to rise,
+Gold poured across the morning skies.</div>`,q:"Poem 3 is one stanza. What kind of stanza is it, and what is its rhyme scheme?",opts:["couplet, AB","tercet, AAB","quatrain, AABB","quatrain, ABAB"],a:2,hint:"Count the lines first. Then check: day/gray, rise/skies.",why:"Four lines make a quatrain. Day/gray rhyme (AA) and rise/skies rhyme (BB), so it is AABB."},
+   {t:"mc",passage:`<div class="pt">Poem 4</div><div class="poem">My grandmother's hands
+are maps
+of every garden
+she ever planted.</div>`,q:"Why might the poet break Poem 4 into such short lines?",opts:["to make the poem rhyme","to slow the reader down so the words, like 'are maps,' stand out","to follow the rules of a haiku","to make the poem funny"],a:1,hint:"What does your voice do at the end of each line?",why:"Short line breaks make the reader pause, so the important image 'are maps' gets extra attention."},
+   {t:"mc",q:"Poem 4 has no rhyme and no set rhythm. What form is it?",opts:["free verse","sonnet","limerick","ode"],a:0,hint:"Which form has no set rules for rhyme or rhythm?",why:"With no set rhyme or rhythm, Poem 4 is free verse."},
+   {t:"order",q:"Put the poem parts in order from SMALLEST to BIGGEST.",items:["syllable","word","line","stanza","whole poem"],hint:"A word is made of syllables. Lines are made of words.",why:"Syllables build words, words build lines, lines build stanzas, and stanzas build the whole poem."},
+   {t:"write",q:"Compare the haiku (Poem 1) and the limerick (Poem 2). How does each one's structure create a different feeling for the reader?",starters:["The haiku has ___, which makes it feel ___.","The limerick has ___, which makes it feel ___.","The structures are different because ___."],look:["haiku","limerick","rhyme","syllable","calm","funny","quiet","line"],model:"The haiku has only three short lines with 5-7-5 syllables, which makes it feel calm and quiet, like a single peaceful moment. The limerick has five lines with an AABBA rhyme and a bouncy beat, which makes it feel funny and playful."}
+  ]},
+/* ---------------- 4 PLOT ---------------- */
+{ id:"plot", color:"#2c7be5", title:"Story Path", blurb:"Plot elements & conflict",
+  learn:[
+   {h:"The plot mountain", html:`${PLOT_SVG}<ul><li><span class="term">Exposition</span>: introduces the characters, setting, and background.</li>
+   <li><span class="term">Rising action</span>: the conflict begins and problems build. Tension grows.</li>
+   <li><span class="term">Climax</span>: the turning point, the moment of greatest tension.</li>
+   <li><span class="term">Falling action</span>: events right after the climax, as things settle.</li>
+   <li><span class="term">Resolution</span>: how the story ends and the conflict is solved.</li></ul>`},
+   {h:"Conflict drives the story", html:`<p><span class="term">Conflict</span> is the problem or struggle in a story. Without it, nothing happens!</p>
+   <ul><li><b>Character vs. character</b>: two people clash.</li><li><b>Character vs. self</b>: a struggle inside the character, like fear or a tough choice.</li><li><b>Character vs. nature</b>: a struggle against weather, animals, or the land.</li><li><b>Character vs. society</b>: a struggle against rules, groups, or community.</li></ul>
+   <div class="tip">Many stories have more than one conflict. Look for the one the whole story is about.</div>`}
+  ],
+  example:{q:`In a story, a boy is lost in the woods as a snowstorm rolls in. What type of conflict is this?`,a:`It is <b>character vs. nature</b>. The boy is struggling against the storm and the wilderness, not against another person.`},
+  passage:{title:"The Bridge at Miller Creek",lines:[
+   "Maya Torres had lived in Willow Bend for only two weeks, and she still ate lunch alone every day.",
+   "When Mr. Grant announced the bridge challenge, teams of three would build a craft-stick bridge that could hold ten pounds. Maya's stomach dropped. She didn't know anyone to ask.",
+   "Mr. Grant placed her with Jordan and Eli, who argued about everything. Their first bridge sagged. Their second snapped in half. With two days left, Jordan wanted to quit.",
+   "Then Maya remembered the triangles in her dad's construction sketches. She drew a new design full of triangles. On test day, Mr. Grant stacked the weights: eight pounds, nine pounds… ten. The bridge held!",
+   "The class cheered, and Jordan gave Maya a high five.",
+   "The next day, Jordan and Eli waved Maya over to their lunch table."]},
+  qs:[
+   {t:"tap",q:"Tap the paragraph that is the <b>climax</b>, the moment of greatest tension.",a:3,hint:"Where is the big turning point? When do we finally find out what happens?",why:"The weight test is the most tense moment, and the bridge holding is the turning point. That is the climax."},
+   {t:"mc",q:"What does the first paragraph (the exposition) mainly do?",opts:["It shows the bridge breaking.","It introduces Maya and shows she is new and lonely.","It solves the main problem.","It tells how the test ended."],a:1,hint:"Exposition introduces characters and background.",why:"The exposition introduces Maya and tells us she is new and eats lunch alone, which sets up her problem."},
+   {t:"mc",q:`"Maya's stomach dropped. She didn't know anyone to ask." This shows which type of conflict?`,opts:["character vs. nature","character vs. society","character vs. self","no conflict"],a:2,hint:"Is the struggle outside her or inside her feelings?",why:"Maya's worry about fitting in is an inside struggle, so it is character vs. self."},
+   {t:"order",q:"Put these events in the order they happen in the plot.",items:["Maya eats lunch alone in her new town.","Mr. Grant announces the bridge challenge.","The team's second bridge snaps in half.","The bridge holds ten pounds.","Jordan and Eli invite Maya to their lunch table."],hint:"Start with the exposition and end with the resolution.",why:"Exposition (lunch alone) → rising action (challenge, broken bridge) → climax (bridge holds) → resolution (new friends)."},
+   {t:"mc",q:"How does the resolution connect to the exposition?",opts:["Maya moves away again.","Maya started out eating alone and ends up with friends at lunch.","The bridge breaks at the end.","Mr. Grant cancels the challenge."],a:1,hint:"Compare the very first paragraph with the very last one.",why:"She begins alone at lunch and ends sitting with Jordan and Eli. The resolution solves the problem from the exposition."},
+   {t:"write",q:"Explain how the climax helps solve Maya's conflict. Use details from the story.",starters:["At the climax, ___.","This helps solve Maya's conflict because ___.","Afterward, ___."],look:["climax","bridge","friends","lunch","held","alone","conflict"],model:"At the climax, Maya's triangle design holds ten pounds. This helps solve her conflict because her teammates finally see what she can do. Afterward, Jordan and Eli invite her to lunch, so she is no longer alone."}
+  ]},
+/* ---------------- 5 FLASHBACK & POV ---------------- */
+{ id:"pov", color:"#d64f8a", title:"Time Travel Lock", blurb:"Flashback, foreshadowing & point of view",
+  learn:[
+   {h:"Flashback and foreshadowing", html:`<p>Authors don't always tell events in order. They can jump through time!</p>
+   <ul><li><span class="term">Flashback</span>: a scene from the <b>past</b> that interrupts the present story. Clue words: <i>remembered, years ago, when he was little, had</i>.</li>
+   <li><span class="term">Why authors use it</span>: to show background, explain why a character acts or feels a certain way, or build suspense.</li>
+   <li><span class="term">Foreshadowing</span>: hints or clues about what <b>will</b> happen later.</li></ul>`},
+   {h:"Who is telling the story?", html:`<ul><li><span class="term">First person</span>: the narrator is a character in the story and uses <b>I, me, we</b>. We only know what that character knows.</li>
+   <li><span class="term">Third person limited</span>: an outside narrator uses <b>he, she, they</b> and shares the thoughts of <b>one</b> character.</li>
+   <li><span class="term">Third person omniscient</span>: an outside narrator knows the thoughts and feelings of <b>all</b> the characters.</li></ul>
+   <div class="tip">The narrator controls what you know. Changing the narrator changes the story you get to see.</div>`}
+  ],
+  example:{q:`"I peeked around the corner. My heart was pounding." What point of view is this?`,a:`It is <b>first person</b>. The narrator uses I and my, and we only know this one character's feelings.`},
+  passage:{title:"The High Dive",lines:[
+   "Diego gripped the edge of the diving board. Below him, the pool glittered like broken glass.",
+   "He was six again, slipping off the lake dock, water rushing up his nose, his father's arms pulling him up just in time.",
+   "He had not gone near deep water since that day.",
+   "\"You've got this!\" his sister called from the bleachers.",
+   "Diego took a deep breath, bent his knees, and jumped."]},
+  qs:[
+   {t:"tap",q:"Tap the sentence that is a <b>flashback</b>.",a:1,hint:"Which sentence jumps back to when Diego was younger?",why:"'He was six again…' takes us back in time to the lake. That is the flashback."},
+   {t:"mc",q:"Why does the author include the flashback?",opts:["to describe the pool's color","to explain why Diego is afraid of deep water","to introduce his sister","to show the end of the story"],a:1,hint:"What does the memory help us understand about how Diego feels right now?",why:"The memory of almost drowning explains why the high dive is so scary for him."},
+   {t:"mc",q:"What point of view is \"The High Dive\" told from?",opts:["first person","third person limited","third person omniscient","second person"],a:1,hint:"Look for he/she. Whose thoughts do we know?",why:"The narrator uses he and only shares Diego's thoughts and memories. That is third person limited."},
+   {t:"mc",q:"If the story were told by Diego's sister in first person, what would readers probably NOT know?",opts:["that Diego jumped","Diego's memory of the lake","that the sister was cheering","where Diego was standing"],a:1,hint:"A first-person narrator only knows what is in her own head.",why:"The sister can see him jump, but she can't see his private memory. Changing the narrator changes what readers know."},
+   {t:"mc",q:`"Ana glanced at the dark clouds, then left her umbrella by the door." This sentence is an example of…`,opts:["flashback","foreshadowing","hyperbole","resolution"],a:1,hint:"Does it look back in time, or hint at what might happen next?",why:"The dark clouds and forgotten umbrella hint that Ana will get caught in the rain. That is foreshadowing."},
+   {t:"multi",q:"Select ALL the clue words that often signal a <b>flashback</b>.",opts:["remembered","years ago","tomorrow","back when she was little","suddenly"],a:[0,1,3],hint:"Which words point to the past?",why:"Remembered, years ago, and back when she was little all point to the past."},
+   {t:"write",q:`How does the flashback change the way you feel when Diego finally jumps? Explain using details.`,starters:["The flashback shows ___.","Because of this, when Diego jumps, I feel ___.","Without the flashback, ___."],look:["flashback","afraid","lake","brave","father","proud","scared"],model:"The flashback shows that Diego almost drowned in a lake when he was six. Because of this, when he jumps, I feel proud of him, because I know he is facing a real fear. Without the flashback, the jump would seem like an ordinary dive."}
+  ]},
+/* ---------------- 6 CENTRAL IDEA ---------------- */
+{ id:"central", color:"#3f9b3a", title:"Field Notes: Central Idea", blurb:"Central idea & summary",
+  learn:[
+   {h:"Topic vs. central idea", html:`<ul><li><span class="term">Topic</span>: what the text is about, in a word or two. <i>(Chimpanzees)</i></li>
+   <li><span class="term">Central idea</span>: the most important point the author makes about the topic, in a full sentence. <i>(Chimpanzees use tools and live in close family groups, much like people.)</i></li>
+   <li><span class="term">Supporting details</span>: facts, examples, and quotes that prove the central idea.</li></ul>
+   <div class="tip">Test: does the idea fit the <b>whole</b> text, or just one paragraph? The central idea covers the whole thing.</div>`},
+   {h:"Writing a strong summary", html:`<p>A <span class="term">summary</span> is a short retelling of the most important parts.</p>
+   <ul><li>Start with the <b>central idea</b>.</li><li>Add only the <b>key</b> supporting details.</li><li>Use your <b>own words</b>.</li><li>Leave out small details and your <b>opinions</b>.</li></ul>`}
+  ],
+  example:{q:`Which is the topic and which is the central idea? (A) "Sea turtles." (B) "Plastic pollution is harming sea turtles, but people can help."`,a:`(A) is the <b>topic</b>, just a couple of words. (B) is the <b>central idea</b>, a full sentence that tells the author's main point about the topic.`},
+  passage:{title:"Patience in the Forest",lines:[
+   "In 1960, a young woman named Jane Goodall arrived at Gombe Stream in Tanzania to study wild chimpanzees.",
+   "She had a notebook, a pair of binoculars, and a great deal of patience.",
+   "At first, the chimpanzees ran away whenever she came near, but she returned to the same spots day after day until they grew used to her.",
+   "One day she watched a chimpanzee she called David Greybeard strip the leaves from a twig and poke it into a termite mound to fish out insects.",
+   "At the time, many scientists believed that only humans made and used tools.",
+   "Goodall also gave the chimpanzees names instead of numbers and recorded their personalities and friendships.",
+   "Her patient, careful observations changed the way the world understands animals."]},
+  qs:[
+   {t:"mc",q:"What is the <b>topic</b> of the passage?",opts:["binoculars","Jane Goodall's study of chimpanzees","termite mounds","Tanzania's weather"],a:1,hint:"The topic is what the whole passage is about, in a few words.",why:"The whole passage is about Jane Goodall studying chimpanzees."},
+   {t:"mc",q:"Which sentence best states the <b>central idea</b>?",opts:["Jane Goodall brought binoculars to Tanzania.","Chimpanzees eat termites.","Jane Goodall's patient study of wild chimpanzees led to discoveries that changed how people see animals.","Some chimpanzees ran away from Jane Goodall."],a:2,hint:"Which choice covers the WHOLE passage, not just one detail?",why:"Only this choice covers her patience, her discoveries, and their big impact, which is the point of the whole passage."},
+   {t:"tap",q:"Tap the sentence that best shows why David Greybeard's tool use was such a <b>big discovery</b>.",a:4,hint:"Find the sentence that tells what scientists believed before.",why:"Scientists thought only humans used tools. That is why seeing a chimp make a tool was so important."},
+   {t:"mc",q:"Which detail is LEAST important to include in a summary?",opts:["She watched a chimpanzee use a twig as a tool.","She brought a pair of binoculars.","She returned day after day until the chimps trusted her.","Her work changed how the world understands animals."],a:1,hint:"Which detail could you remove without changing the main point?",why:"The binoculars are a small detail. The others support the central idea."},
+   {t:"mc",q:"Which is the BEST summary of the passage?",opts:["Jane Goodall is the best scientist ever, and everyone should love chimps.","In 1960 Jane Goodall went to Tanzania. She had a notebook. Chimps ran. She saw termites. She named chimps.","Jane Goodall patiently studied wild chimpanzees in Tanzania. She saw a chimp make a tool, which surprised scientists, and her careful notes changed how people understand animals.","Chimpanzees live in Tanzania and eat termites with twigs."],a:2,hint:"A summary states the central idea plus key details, in your own words, with no opinions.",why:"Choice C gives the central idea and key details without opinions. Choice A has opinions; B is a list of small details; D misses the main point."},
+   {t:"write",q:"Write your own 2–3 sentence summary of \"Patience in the Forest.\" Start with the central idea.",starters:["The central idea is that ___.","First, ___.","Her discovery ___, and it changed ___."],look:["Goodall","chimpanzee","tool","patient","scientists","changed"],model:"Jane Goodall's patient study of wild chimpanzees changed how people understand animals. After the chimps grew used to her, she saw one use a twig as a tool, which surprised scientists who thought only humans used tools. She also recorded the chimps' personalities and friendships."}
+  ]},
+/* ---------------- 7 TEXT STRUCTURE ---------------- */
+{ id:"structure", color:"#e09f1f", title:"Text Blueprint", blurb:"Text structure & author's purpose",
+  learn:[
+   {h:"How authors organize ideas", html:`<ul>
+   <li><span class="term">Chronological / sequence</span>: events in time order. <i>First, next, then, in 1960, finally</i></li>
+   <li><span class="term">Cause and effect</span>: why something happens and the results. <i>Because, so, as a result, therefore</i></li>
+   <li><span class="term">Compare and contrast</span>: how things are alike and different. <i>Both, similarly, however, unlike, on the other hand</i></li>
+   <li><span class="term">Problem and solution</span>: a problem and ways to fix it. <i>Problem, solution, one way to solve, to fix this</i></li>
+   <li><span class="term">Description</span>: details about one topic. <i>For example, such as, looks like</i></li></ul>`},
+   {h:"Structure serves a purpose", html:`<p>The <span class="term">author's purpose</span> is the reason for writing: to <b>inform</b>, to <b>persuade</b>, or to <b>entertain</b>.</p>
+   <div class="tip">An author who wants readers to care about endangered animals might use <b>cause and effect</b> to show why animals are in danger, then <b>problem and solution</b> to show how readers can help.</div>`}
+  ],
+  example:{q:`"Because the dam was built, the river slowed down. As a result, fish could no longer swim upstream." What structure is this?`,a:`<b>Cause and effect.</b> The signal words <i>because</i> and <i>as a result</i> show that building the dam (cause) led to changes in the river and fish (effects).`},
+  qs:[
+   {t:"mc",passage:`Because forests in Africa are being cut down for farms and roads, chimpanzees are losing their homes. As a result, many chimpanzee groups are cut off from one another and have a harder time finding food.`,q:"Which text structure does this paragraph use?",opts:["chronological","compare and contrast","cause and effect","description"],a:2,hint:"Look for the signal words: because, as a result.",why:"Because and as a result signal cause and effect. Cutting forests causes chimps to lose their homes."},
+   {t:"mc",passage:`Chimpanzees and bonobos are closely related apes, and both live in African forests. However, chimpanzee groups are usually led by males, while bonobo groups are often led by females.`,q:"Which text structure does this paragraph use?",opts:["problem and solution","compare and contrast","chronological","cause and effect"],a:1,hint:"Notice the words both and however.",why:"Both shows a similarity and however shows a difference. That is compare and contrast."},
+   {t:"mc",passage:`Illegal hunting is a serious threat to wild chimpanzees. One solution is training local park rangers to patrol the forests. Another way to help is teaching nearby communities about why chimpanzees matter.`,q:"Which text structure does this paragraph use?",opts:["problem and solution","description","compare and contrast","chronological"],a:0,hint:"Is there a threat, and then ways to fix it?",why:"It names a problem (illegal hunting) and then gives solutions (rangers and teaching communities)."},
+   {t:"multi",q:"Select ALL the signal words that show <b>chronological</b> order.",opts:["first","however","after that","because","finally"],a:[0,2,4],hint:"Which words tell you WHEN something happens?",why:"First, after that, and finally show time order. However shows contrast and because shows cause."},
+   {t:"mc",q:"An author writes about how forests are disappearing and then lists ways students can help save chimpanzees. What is the author's main purpose?",opts:["to entertain readers with a funny story","to persuade readers to help protect chimpanzees","to compare apes and monkeys","to describe what a forest looks like"],a:1,hint:"The author wants readers to DO something.",why:"Showing a problem and asking readers to help means the author is trying to persuade."},
+   {t:"write",q:"Write 2–3 sentences about chimpanzees (or any animal) using a <b>cause and effect</b> structure. Use at least two signal words.",starters:["Because ___,","As a result, ___.","This causes ___, so ___."],look:["because","as a result","so","therefore","cause","effect"],model:"Because chimpanzees are losing their forest homes, they have less space to find food. As a result, some groups become weaker. So protecting forests is important for keeping chimpanzees healthy."}
+  ]},
+/* ---------------- 8 RHETORIC ---------------- */
+{ id:"appeals", color:"#c0392b", title:"Persuasion Lock", blurb:"Ethos, pathos & logos",
+  learn:[
+   {h:"Three ways to persuade", html:`<ul>
+   <li><span class="term">Ethos</span> (trust): the writer shows they are believable. They mention experience, expertise, or fairness. <i>"As a doctor for 20 years…"</i></li>
+   <li><span class="term">Pathos</span> (emotion): the writer makes the reader feel something: happy, sad, scared, proud. <i>"Imagine a puppy shivering alone in the cold."</i></li>
+   <li><span class="term">Logos</span> (logic): the writer uses facts, numbers, reasons, and evidence. <i>"Studies show that 9 out of 10…"</i></li></ul>
+   <div class="tip">Memory key: <b>E</b>thos = <b>E</b>xpert. <b>P</b>athos = <b>P</b>assion (feelings). <b>L</b>ogos = <b>L</b>ogic.</div>`},
+   {h:"Parts of an argument", html:`<ul><li><span class="term">Claim</span>: the writer's main position.</li><li><span class="term">Reasons and evidence</span>: support for the claim.</li><li><span class="term">Counterclaim</span>: what someone on the other side might say.</li><li><span class="term">Rebuttal</span>: the writer's answer to the counterclaim.</li></ul>
+   <p>Strong writers address the counterclaim. It shows they are fair, which builds ethos too!</p>`}
+  ],
+  example:{q:`"Every year, kids who read 20 minutes a day see about 1.8 million words." Which appeal is this?`,a:`<b>Logos.</b> It uses a number as evidence to convince the reader with logic.`},
+  passage:{title:"A Letter: Our School Needs a Garden (a practice letter)",lines:[
+   "Our school should build a student garden next to the cafeteria.",
+   "As a science teacher for fifteen years, I have seen how much students learn when they work outside.",
+   "Imagine a shy student proudly holding the very first tomato she ever grew.",
+   "In a survey of our sixth graders, most students said they would volunteer to help care for a garden.",
+   "Some people worry that a garden would be too much work.",
+   "However, a weekly schedule of volunteer groups would share the job fairly."]},
+  qs:[
+   {t:"tap",q:"Tap the sentence that states the writer's <b>claim</b>.",a:0,hint:"The claim is the main position, what the writer wants.",why:"The writer's main position is that the school should build a garden."},
+   {t:"tap",q:"Tap the sentence that uses <b>ethos</b>.",a:1,hint:"Which sentence shows why we should trust the writer?",why:"Mentioning fifteen years as a science teacher builds trust. That is ethos."},
+   {t:"tap",q:"Tap the sentence that uses <b>pathos</b>.",a:2,hint:"Which sentence tries to make you feel something?",why:"Picturing a shy student proudly holding her first tomato makes readers feel warm and proud. That is pathos."},
+   {t:"mc",q:`"In a survey of our sixth graders, most students said they would volunteer…" This sentence mainly uses…`,opts:["ethos","pathos","logos","a counterclaim"],a:2,hint:"Survey results are a type of evidence.",why:"A survey is evidence, so this sentence appeals to logic: logos."},
+   {t:"mc",q:"Why does the writer include \"Some people worry that a garden would be too much work\"?",opts:["to change sides in the argument","to bring up a counterclaim and then answer it","to add emotion","to show the writer's experience"],a:1,hint:"What comes right after it?",why:"The writer brings up the other side (counterclaim) and then answers it with a rebuttal: a volunteer schedule."},
+   {t:"mc",q:"Which sentence would BEST add more <b>logos</b> to the letter?",opts:["Gardens are beautiful and make everyone happy.","I love gardening more than anything.","Seeds and soil for the garden would cost less than one new set of cafeteria tables.","Think of how sad students feel stuck inside."],a:2,hint:"Logos uses facts, numbers, and reasons.",why:"Comparing costs is a logical, fact-based reason. The others use feelings or opinions."},
+   {t:"write",q:"Write a claim about something you want at school (example: longer lunch). Then write one sentence using <b>pathos</b> and one using <b>logos</b>. Label each.",starters:["Claim: Our school should ___.","Pathos: Imagine ___.","Logos: Studies show / ___ percent / This would save ___."],look:["claim","pathos","logos","imagine","percent","because","should"],model:"Claim: Our school should have a longer lunch. Pathos: Imagine rushing to eat while your friends are laughing and you never get to join in. Logos: With five more minutes, students would have time to finish their food and get to class ready to learn."}
+  ]},
+/* ---------------- 9 MASTER ---------------- */
+{ id:"master", color:"#f2b705", title:"Master Key Challenge", blurb:"Mix of every skill", final:true,
+  learn:[
+   {h:"Time to use every key!", html:`<p>You've practiced roots, figurative language, poetry, plot, flashback and point of view, central idea, text structure, and persuasion. Now they're all mixed together, just like on a real test.</p>
+   <div class="tip"><b>Locksmith strategy:</b> Read the question first. Find the skill it's asking about. Then pick the key that fits!</div>`}
+  ],
+  qs:[
+   {t:"mc",q:`"The weather report <b>predicted</b> rain." The root <i>dict</i> means say, and <i>pre-</i> means before. Predicted means…`,opts:["said before it happened","looked at closely","wrote down","heard far away"],a:0,hint:"Put the parts together: before + say.",why:"Pre (before) + dict (say) = to say before it happens."},
+   {t:"mc",q:`"After recess, the classroom was a zoo." This is a…`,opts:["simile","metaphor","onomatopoeia","alliteration"],a:1,hint:"Is there a like or as?",why:"It says the classroom WAS a zoo, with no like or as. That is a metaphor."},
+   {t:"mc",q:"Which kind of poem tells a story with characters and events?",opts:["haiku","narrative poem","ode","free verse"],a:1,hint:"Narrative means story.",why:"A narrative poem tells a story."},
+   {t:"mc",q:"The turning point of a story, when tension is highest, is the…",opts:["exposition","rising action","climax","resolution"],a:2,hint:"It's the top of the plot mountain.",why:"The climax is the turning point at the top of the plot mountain."},
+   {t:"mc",q:`"I couldn't believe my eyes when the door creaked open." This sentence is written in…`,opts:["first person","third person limited","third person omniscient","no point of view"],a:0,hint:"Look at the pronouns.",why:"The narrator uses I and my, so it is first person."},
+   {t:"mc",q:`A paragraph uses the words "both," "similarly," and "on the other hand." Its structure is most likely…`,opts:["cause and effect","compare and contrast","problem and solution","chronological"],a:1,hint:"Which structure shows alike and different?",why:"Both and similarly show likenesses; on the other hand shows a difference. That is compare and contrast."},
+   {t:"mc",q:`"Nine out of ten students in our survey said homework helped them on tests." This appeal is…`,opts:["ethos","pathos","logos","hyperbole"],a:2,hint:"Numbers and evidence point to which appeal?",why:"A survey statistic is evidence, so it is logos."},
+   {t:"mc",q:`Which sentence is a <b>central idea</b>, not just a detail?`,opts:["The bridge was made of craft sticks.","Working together and believing in yourself can turn strangers into friends.","Mr. Grant stacked nine pounds.","Maya's dad drew sketches."],a:1,hint:"A central idea is a big point that covers the whole story.",why:"This sentence is a big idea that fits the whole bridge story. The others are small details."},
+   {t:"write",q:"Reflection: Which skill did you get stronger at today? Explain what you learned and one tip you will remember on a test.",starters:["Today I got stronger at ___.","I learned that ___.","A tip I will remember is ___."],look:["learned","remember","tip","stronger","skill"],model:"Today I got stronger at text structure. I learned that signal words like because and as a result show cause and effect. A tip I will remember is to look for those signal words before I pick an answer."}
+  ]}
+];
+
+/* ============ STATE (autosaves on this device) ============ */
+const SAVE_KEY = "ll-master-key-review-v1";
+let S = {name:"", view:"home", st:0, step:0, ans:{}, celebrated:{}, finale:false};
+function load(){ try{ const raw = localStorage.getItem(SAVE_KEY); if(raw){ S = Object.assign(S, JSON.parse(raw)); } }catch(e){} }
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+load();
+
+const PRAISE = ["Way to go!","You unlocked it!","Brilliant thinking!","Nailed it!","Locksmith level up!","You're on fire!","Super reader move!","Fantastic!","Yes! Great job!","You've got the key!"];
+const RETRY = ["So close! You've got this.","Good try! Use the hint and try again.","Keep going, every locksmith tries more than one key!"];
+const pick = a => a[Math.floor(Math.random()*a.length)];
+
+function stepsFor(st){
+  const s = STATIONS[st], out=[];
+  s.learn.forEach((l,i)=>out.push({kind:"learn",i}));
+  if(s.example) out.push({kind:"example"});
+  s.qs.forEach((q,i)=>out.push({kind:"q",i}));
+  out.push({kind:"done"});
+  return out;
+}
+const qid = (st,i)=>STATIONS[st].id+"-"+i;
+function stationDone(st){ return STATIONS[st].qs.every((q,i)=>S.ans[qid(st,i)] && S.ans[qid(st,i)].status); }
+function points(){ let p=0; Object.values(S.ans).forEach(a=>{ if(a.status==="right")p+=10; else if(a.status==="second")p+=5; else if(a.status==="written")p+=10; else if(a.status==="missed")p+=2; }); return p; }
+function updateScore(){ document.getElementById("scoreNum").textContent = points(); }
+
+/* ============ READ ALOUD (Google US English voice) ============ */
+let VOICE=null;
+function pickVoice(){ try{ const v = speechSynthesis.getVoices(); VOICE = v.find(x=>x.name==="Google US English") || v.find(x=>x.lang==="en-US" && /Google/.test(x.name)) || v.find(x=>x.lang==="en-US") || null; }catch(e){} }
+if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(el){
+  if(!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const clone = el.cloneNode(true); clone.querySelectorAll(".no-read,svg,.speak,textarea,.starters,.nav").forEach(n=>n.remove());
+  let txt = clone.innerText.replace(/ELA\.[A-Z0-9.]+/g,"").replace(/[🔑⭐🎉✨🔊]/g,"").replace(/\s+/g," ").trim();
+  const u = new SpeechSynthesisUtterance(txt); if(VOICE) u.voice=VOICE; u.lang="en-US"; u.rate=.95;
+  speechSynthesis.speak(u);
+}
+function stopSpeak(){ try{ speechSynthesis.cancel(); }catch(e){} }
+
+/* ============ CELEBRATION ============ */
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),1800); }
+function popConfetti(){ if(window.confetti) confetti({particleCount:70,spread:70,origin:{y:.75},colors:["#f2b705","#2a9d8f","#e76f51","#7b4fd6","#2c7be5"]}); }
+function bigConfetti(){ if(!window.confetti) return; const end=Date.now()+2200; (function f(){ confetti({particleCount:6,angle:60,spread:60,origin:{x:0}}); confetti({particleCount:6,angle:120,spread:60,origin:{x:1}}); if(Date.now()<end) requestAnimationFrame(f); })(); confetti({particleCount:160,spread:110,origin:{y:.6}}); }
+
+/* ============ RENDER ============ */
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function go(view,st,step){ stopSpeak(); S.view=view; if(st!==undefined)S.st=st; if(step!==undefined)S.step=step; save(); render(); window.scrollTo({top:0,behavior:"smooth"}); }
+
+function render(){
+  updateScore();
+  if(!S.name){ return renderWelcome(); }
+  if(S.view==="station") return renderStation();
+  if(S.view==="finale") return renderFinale();
+  renderHome();
+}
+
+function renderWelcome(){
+  app.innerHTML = `<section class="hero"><h1>Master Key Review</h1><p>Unlock 9 skill locks. Learn each skill, practice it, and earn a golden key. Your answers save on this iPad, so you can leave and come right back.</p></section>
+  <div class="card" style="--c:#2a9d8f"><h3>Welcome, Locksmith!</h3><p>Type your first name to start your key ring.</p>
+  <form class="name-row" id="nameForm"><input type="text" id="nameIn" autocomplete="off" placeholder="First name" aria-label="First name"><button class="btn" type="submit">Start →</button></form></div>`;
+  document.getElementById("nameForm").addEventListener("submit",e=>{e.preventDefault(); const v=document.getElementById("nameIn").value.trim(); if(!v){toast("Type your name first!");return;} S.name=v.slice(0,30); save(); popConfetti(); toast("Welcome, "+S.name+"!"); render();});
+}
+
+function renderHome(){
+  const doneCount = STATIONS.filter((s,i)=>stationDone(i)).length;
+  if(doneCount===STATIONS.length && !S.finale){ S.finale=true; save(); return go("finale"); }
+  app.innerHTML = `<section class="hero"><h1>Hi, ${esc(S.name)}!</h1><p>You have <b style="color:var(--gold)">${doneCount} of ${STATIONS.length}</b> keys. Start with Lock 1 and work your way to the Master Key Challenge. Tap any lock to begin or keep going.</p></section>
+  <div class="map">${STATIONS.map((s,i)=>{ const d=stationDone(i); const started=s.qs.some((q,j)=>S.ans[qid(i,j)]); return `<button class="lock ${d?"done":""}" style="--c:${s.color}" data-st="${i}">
+     ${d?`<span class="keyicon">${KEY_SVG("#c98f00")}</span>`:""}
+     <span class="num">Lock ${i+1}</span><h3>${s.title}</h3><p>${s.blurb}</p>
+     <span class="status">${d?"Key earned ✓":started?"Keep going →":"Start →"}</span></button>`}).join("")}</div>
+  ${doneCount===STATIONS.length?`<div class="nav"><button class="btn" id="toFinale">See my certificate 🎉</button></div>`:""}`;
+  app.querySelectorAll(".lock").forEach(b=>b.addEventListener("click",()=>{ const st=+b.dataset.st; const steps=stepsFor(st); let resume=0; if(S.st===st && S.step) resume=S.step; go("station",st,Math.min(resume,steps.length-1)); }));
+  const f=document.getElementById("toFinale"); if(f) f.onclick=()=>go("finale");
+}
+
+function passageHTML(s){
+  if(!s.passage) return "";
+  return `<div class="passage"><div class="pt">${s.passage.title}</div>${s.passage.lines.map(l=>`<p style="margin:0 0 8px">${l}</p>`).join("")}</div>`;
+}
+
+function renderStation(){
+  const s = STATIONS[S.st], steps = stepsFor(S.st);
+  if(S.step>=steps.length) S.step=steps.length-1;
+  const step = steps[S.step];
+  const pct = Math.round((S.step)/(steps.length-1)*100);
+  let body="", canNext=true, label="";
+  if(step.kind==="learn"){ const l=s.learn[step.i]; label="Learn it"; body=`<h3>${l.h}</h3>${l.html}`; }
+  else if(step.kind==="example"){ label="Try it together"; body=`<h3>Watch me unlock one</h3><p class="q">${s.example.q}</p><p>Think about it first. Then tap to check your thinking.</p><button class="btn dark no-read" id="reveal">Show the answer</button><div class="example-reveal" id="exAns" hidden><div class="feedback good"><b class="big">Here's how a locksmith thinks:</b>${s.example.a}</div></div>`; }
+  else if(step.kind==="q"){ const q=s.qs[step.i]; label=q.t==="write"?"Write it":"Practice "+(step.i+1)+" of "+s.qs.length; body=questionHTML(s,q,step.i); canNext=!!(S.ans[qid(S.st,step.i)]&&S.ans[qid(S.st,step.i)].status); }
+  else { label="Key unlocked"; body=doneHTML(s); }
+  app.innerHTML = `<div class="station-head"><div><div class="eyebrow">Lock ${S.st+1} of ${STATIONS.length}</div><h2>${s.title}</h2></div><button class="btn ghost" id="toMap" style="color:#fff;box-shadow:inset 0 0 0 3px rgba(255,255,255,.35)">← Key map</button></div>
+  <div class="progress" aria-label="Progress"><i style="width:${pct}%"></i></div>
+  <article class="card" id="card" style="--c:${s.color}"><button class="speak no-read" id="speakBtn">🔊 Read to me</button><span class="step-tag no-read">${label}</span>${body}
+  <div class="nav no-read"><button class="btn ghost" id="back" ${S.step===0?"disabled":""}>← Back</button>
+  ${step.kind==="done"?`<button class="btn" id="next">${S.st<STATIONS.length-1?"Next lock →":"Finish 🎉"}</button>`:`<button class="btn" id="next" ${canNext?"":"disabled"}>Next →</button>`}</div></article>`;
+  document.getElementById("toMap").onclick=()=>go("home");
+  document.getElementById("speakBtn").onclick=()=>speak(document.getElementById("card"));
+  document.getElementById("back").onclick=()=>go("station",S.st,S.step-1);
+  document.getElementById("next").onclick=()=>{
+    if(step.kind==="done"){ if(S.st<STATIONS.length-1) go("station",S.st+1,0); else go("finale"); }
+    else go("station",S.st,S.step+1);
+  };
+  const r=document.getElementById("reveal"); if(r) r.onclick=()=>{ document.getElementById("exAns").hidden=false; r.hidden=true; popConfetti(); };
+  if(step.kind==="q") wireQuestion(s,s.qs[step.i],step.i);
+  if(step.kind==="done" && !S.celebrated[s.id]){ S.celebrated[s.id]=true; save(); setTimeout(bigConfetti,250); }
+}
+
+function doneHTML(s){
+  const st=S.st; let right=0,total=0;
+  s.qs.forEach((q,i)=>{ const a=S.ans[qid(st,i)]; if(q.t!=="write"){ total++; if(a&&(a.status==="right"||a.status==="second")) right++; } });
+  const all = stationDone(st);
+  if(!all) return `<div class="center"><h3>Almost there!</h3><p>You still have some practice to finish in this lock. Tap Back to find it.</p></div>`;
+  return `<div class="center"><span class="bigkey">${KEY_SVG(s.color)}</span><h3>Key unlocked: ${s.title}!</h3>
+  <p>Amazing work, ${esc(S.name)}! You got <b>${right} of ${total}</b> practice questions and finished your writing. Every key you earn makes you a stronger reader.</p>
+  <p>${pick(["Your brain just grew a little bigger!","That's how real locksmiths work: one key at a time.","You should be proud of yourself!"])}</p></div>`;
+}
+
+/* ---------- question HTML ---------- */
+function questionHTML(s,q,i){
+  const a=S.ans[qid(S.st,i)]||{};
+  let h = "";
+  if(q.t==="tap"){ h+=`<div class="passage"><div class="pt">${s.passage.title}</div>${s.passage.lines.map((l,k)=>`<button class="tapline" data-k="${k}">${l}</button>`).join("")}</div>`; }
+  else { if(s.passage && q.t!=="write" && q.t!=="order" && !q.passage && ["fig","plot","pov","central","appeals"].includes(s.id)) h+=passageHTML(s); if(q.passage) h+=`<div class="passage">${q.passage}</div>`; }
+  if(q.t==="write" && s.passage) h+=passageHTML(s);
+  h+=`<p class="q">${q.q}</p>`;
+  if(q.t==="mc"){ h+=`<div class="opts">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="ltr">${"ABCDE"[k]}</span><span>${o}</span></button>`).join("")}</div>`; }
+  if(q.t==="multi"){ h+=`<p class="no-read" style="font-size:15px;color:var(--muted)">Tap every answer that fits, then tap Check.</p><div class="opts">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}" aria-pressed="false"><span class="ltr">${"ABCDE"[k]}</span><span>${o}</span></button>`).join("")}</div><div class="nav no-read" style="justify-content:flex-start"><button class="btn dark" id="check">Check</button></div>`; }
+  if(q.t==="order"){ h+=`<p class="no-read" style="font-size:15px;color:var(--muted)">Tap the cards in the correct order. Tap Start over to try again.</p><div class="order-ans" id="oAns"></div><div class="order-bank" id="oBank"></div><div class="nav no-read" style="justify-content:flex-start"><button class="btn dark" id="check">Check</button><button class="btn ghost" id="oReset">Start over</button></div>`; }
+  if(q.t==="write"){ h+=`<div class="starters no-read">${q.starters.map(t=>`<button type="button" data-s="${esc(t)}">+ ${esc(t)}</button>`).join("")}</div>
+   <textarea id="wbox" aria-label="Your answer" placeholder="Type or write with your Apple Pencil here…">${esc(a.text||"")}</textarea><div class="wc no-read" id="wc"></div>
+   <div class="nav no-read" style="justify-content:flex-start"><button class="btn dark" id="submitW">Submit my writing</button></div>`; }
+  h+=`<div id="fb"></div>`;
+  return h;
+}
+
+function setAns(i,obj){ S.ans[qid(S.st,i)] = Object.assign(S.ans[qid(S.st,i)]||{},obj); save(); updateScore(); }
+function enableNext(){ const n=document.getElementById("next"); if(n) n.disabled=false; }
+function fb(kind,title,msg){ document.getElementById("fb").innerHTML=`<div class="feedback ${kind}"><b class="big">${title}</b>${msg}</div>`; }
+
+function wireQuestion(s,q,i){
+  const key=qid(S.st,i); const a=S.ans[key]||{};
+  const finished = !!a.status;
+
+  if(q.t==="mc"||q.t==="tap"){
+    const sel = q.t==="mc"?".opt":".tapline";
+    const btns=[...app.querySelectorAll(sel)];
+    const show=()=>{ btns.forEach(b=>{ const k=+b.dataset.k; if(k===q.a) b.classList.add("right"); else if((a.wrong||[]).includes(k)) b.classList.add("wrong"); b.disabled=true; }); };
+    (a.wrong||[]).forEach(k=>{ btns[k].classList.add("wrong"); btns[k].disabled=true; });
+    if(finished){ show(); fb(a.status==="missed"?"miss":"good", a.status==="missed"?"Here's the key:":"You got it!", q.why); return; }
+    btns.forEach(b=>b.addEventListener("click",()=>{
+      const k=+b.dataset.k; const cur=S.ans[key]||{wrong:[]}; const wrong=cur.wrong||[];
+      if(k===q.a){ setAns(i,{status:wrong.length?"second":"right",wrong}); a.wrong=wrong; show(); fb("good",pick(PRAISE)+" ✨",q.why); popConfetti(); toast(wrong.length?"+5 key points":"+10 key points"); enableNext(); }
+      else{ wrong.push(k); a.wrong=wrong; b.classList.add("wrong"); b.disabled=true;
+        if(wrong.length>=2){ setAns(i,{status:"missed",wrong}); show(); fb("miss","Good effort! Here's the key:",q.why+" <br><br>Now you know it for next time. Keep going!"); enableNext(); }
+        else { setAns(i,{wrong}); fb("hint",pick(RETRY),"💡 Hint: "+q.hint); } }
+    }));
+  }
+
+  if(q.t==="multi"){
+    const btns=[...app.querySelectorAll(".opt")]; const chosen=new Set(a.picked||[]);
+    const paint=()=>btns.forEach(b=>{ const on=chosen.has(+b.dataset.k); b.classList.toggle("sel",on); b.setAttribute("aria-pressed",on); });
+    const reveal=()=>{ btns.forEach(b=>{ const k=+b.dataset.k; b.classList.remove("sel"); if(q.a.includes(k)) b.classList.add("right"); else if(chosen.has(k)) b.classList.add("wrong"); b.disabled=true; }); document.getElementById("check").hidden=true; };
+    paint();
+    if(finished){ reveal(); fb(a.status==="missed"?"miss":"good",a.status==="missed"?"Here's the key:":"You got it!",q.why); return; }
+    btns.forEach(b=>b.addEventListener("click",()=>{ const k=+b.dataset.k; chosen.has(k)?chosen.delete(k):chosen.add(k); paint(); }));
+    document.getElementById("check").onclick=()=>{
+      if(!chosen.size){ toast("Pick at least one!"); return; }
+      const ok = chosen.size===q.a.length && q.a.every(k=>chosen.has(k));
+      const tries=(S.ans[key]&&S.ans[key].tries)||0;
+      if(ok){ setAns(i,{status:tries?"second":"right",picked:[...chosen]}); reveal(); fb("good",pick(PRAISE)+" ✨",q.why); popConfetti(); toast(tries?"+5 key points":"+10 key points"); enableNext(); }
+      else if(tries>=1){ setAns(i,{status:"missed",picked:[...chosen],tries:2}); reveal(); fb("miss","Good effort! Here's the key:",q.why); enableNext(); }
+      else { setAns(i,{tries:1}); fb("hint",pick(RETRY),"💡 Hint: "+q.hint); }
+    };
+  }
+
+  if(q.t==="order"){
+    const bank=document.getElementById("oBank"), ans=document.getElementById("oAns");
+    let order=[]; const shuffled=q.items.map((t,k)=>k).sort(()=>Math.random()-.5);
+    if(shuffled.every((v,k)=>v===k)) shuffled.reverse();
+    const draw=()=>{
+      ans.innerHTML = order.length?order.map((k,n)=>`<div class="opt" style="cursor:default"><span class="ltr">${n+1}</span><span>${q.items[k]}</span></div>`).join(""):`<span style="color:var(--muted);padding:6px">Your order will appear here.</span>`;
+      bank.innerHTML = shuffled.filter(k=>!order.includes(k)).map(k=>`<button class="opt" data-k="${k}"><span class="ltr">+</span><span>${q.items[k]}</span></button>`).join("");
+      bank.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{ order.push(+b.dataset.k); draw(); });
+    };
+    const final=()=>{ order=q.items.map((t,k)=>k); draw(); ans.querySelectorAll(".opt").forEach(e=>e.classList.add("right")); document.getElementById("check").hidden=true; document.getElementById("oReset").hidden=true; };
+    if(finished){ final(); fb(a.status==="missed"?"miss":"good",a.status==="missed"?"Here's the correct order:":"You got it!",q.why); return; }
+    draw();
+    document.getElementById("oReset").onclick=()=>{ order=[]; draw(); };
+    document.getElementById("check").onclick=()=>{
+      if(order.length<q.items.length){ toast("Place every card first!"); return; }
+      const ok=order.every((v,k)=>v===k); const tries=(S.ans[key]&&S.ans[key].tries)||0;
+      if(ok){ setAns(i,{status:tries?"second":"right"}); final(); fb("good",pick(PRAISE)+" ✨",q.why); popConfetti(); toast(tries?"+5 key points":"+10 key points"); enableNext(); }
+      else if(tries>=1){ setAns(i,{status:"missed",tries:2}); final(); fb("miss","Good effort! Here's the correct order:",q.why); enableNext(); }
+      else { setAns(i,{tries:1}); order=[]; draw(); fb("hint",pick(RETRY),"💡 Hint: "+q.hint); }
+    };
+  }
+
+  if(q.t==="write"){
+    const box=document.getElementById("wbox"), wc=document.getElementById("wc");
+    const count=()=>{ const n=(box.value.trim().match(/\S+/g)||[]).length; wc.textContent=n+" words · aim for at least 20 · saved on this iPad"; return n; };
+    count();
+    box.addEventListener("input",()=>{ setAns(i,{text:box.value}); count(); });
+    app.querySelectorAll(".starters button").forEach(b=>b.onclick=()=>{ box.value=(box.value.trim()?box.value.trimEnd()+" ":"")+b.dataset.s+" "; box.focus(); setAns(i,{text:box.value}); count(); });
+    const praise=()=>{ const txt=box.value.toLowerCase(); const hits=q.look.filter(w=>txt.includes(w)); const extra = hits.length>=2?"You used strong skill words like <b>"+hits.slice(0,3).join(", ")+"</b>. That shows real understanding!":"Nice job putting your thinking into words!";
+      fb("good","Writing saved! "+pick(PRAISE)+" 📝",extra+`<div class="model"><b>Compare with a model answer:</b><br>${q.model}<br><br><i>Does your answer have the same key ideas? You can still add to yours above.</i></div>`); };
+    if(finished){ praise(); }
+    document.getElementById("submitW").onclick=()=>{
+      const n=count();
+      if(n<12){ fb("hint","Keep building!","Write a little more. Try using the sentence starters above. Aim for at least 20 words."); return; }
+      const first=!S.ans[key].status; setAns(i,{status:"written",text:box.value}); praise(); if(first){ popConfetti(); toast("+10 key points"); } enableNext();
+    };
+  }
+}
+
+function renderFinale(){
+  const rows = STATIONS.map((s,i)=>{ let r=0,t=0; s.qs.forEach((q,j)=>{ if(q.t!=="write"){t++; const a=S.ans[qid(i,j)]; if(a&&(a.status==="right"||a.status==="second"))r++;} }); return {s,r,t,done:stationDone(i)}; });
+  const allDone = rows.every(x=>x.done);
+  const date = new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+  app.innerHTML = `<div class="card cert" style="--c:#f2b705">
+   <span class="bigkey">${KEY_SVG("#c98f00")}</span>
+   <h2>${allDone?"Master Locksmith":"Keep unlocking!"}</h2>
+   <p>${allDone?"This certifies that":"You're doing great,"}</p>
+   <div class="who">${esc(S.name)}</div>
+   <p>${allDone?"unlocked all 9 reading skill locks with "+points()+" key points.":"Finish the rest of the locks to earn your Master Locksmith certificate."}</p>
+   <p style="color:var(--muted)">${date}</p>
+   <div class="tally">${rows.map(x=>`<div><b>${x.s.title}</b><br>${x.done?x.r+" / "+x.t+" correct ✓":"not finished yet"}</div>`).join("")}</div>
+   <p class="no-read">Show this screen to your teacher, or tap Copy my results to paste them into Canvas.</p>
+   <div class="nav" style="justify-content:center"><button class="btn" id="copyRes">Copy my results</button><button class="btn ghost" id="toMap2">← Key map</button></div>
+  </div>`;
+  if(allDone){ setTimeout(bigConfetti,200); setTimeout(bigConfetti,1600); toast("You did it, "+S.name+"! 🎉"); }
+  document.getElementById("toMap2").onclick=()=>go("home");
+  document.getElementById("copyRes").onclick=()=>{
+    let txt=`Master Key Review – ${S.name} – ${date}\nKey points: ${points()}\n\n`;
+    rows.forEach((x,i)=>{ txt+=`${x.s.title}: ${x.done?x.r+"/"+x.t+" correct":"not finished"}\n`; x.s.qs.forEach((q,j)=>{ if(q.t==="write"){ const a=S.ans[qid(i,j)]; txt+=`  Writing: ${a&&a.text?a.text.trim():"(blank)"}\n`; } }); });
+    navigator.clipboard.writeText(txt).then(()=>toast("Copied! Paste it in Canvas.")).catch(()=>{ const ta=document.createElement("textarea"); ta.value=txt; ta.style.width="100%"; ta.rows=8; document.querySelector(".cert").appendChild(ta); ta.select(); toast("Select all and copy the box below."); });
+  };
+}
+
+render();
+</script>
+
+</body></html>
